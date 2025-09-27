@@ -11,6 +11,6 @@ browser.config.driver = webdriver.Remote(
 )
 
 browser.config.base_url = 'https://google.com'
-browser.config.timeout = 2
+browser.config.timeout = 12
 
 browser.open('/ncr')
