@@ -76,7 +76,7 @@ class StudentForm:
 @pytest.fixture(autouse=True, scope='function')
 def browser_config():
     options = Options()
-    # options.add_argument('--headless=new')  # включай для CI
+    options.add_argument('--headless=new')  # включай для CI
     browser.config.driver_options = options
     browser.config.timeout = 10
     browser.config.hold_browser_open = True  # Чтобы не закрывалось при ошибке
@@ -117,7 +117,7 @@ def test_valid_form():
     form.browser.element(form.LASTNAME_INPUT).type("Ivanov")
     form.browser.element(form.EMAIL_INPUT).type("andrew.ivanov@example.com")
     form.browser.element(form.MOBILE_INPUT).type("1234567890")
-    form.select_subjects("Maths")
+    form.select_subjects("Math")
     form.browser.element(form.UPLOAD_INPUT).set("/Users/Geyger.Andrey/Desktop/file_example_JPG_100kB.jpg")
     form.browser.element(form.CURRENT_ADDRESS_INPUT).type("123 Main St")
     form.browser.element(form.GENDER_MALE_LABEL).should(be.clickable).click()
