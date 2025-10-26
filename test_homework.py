@@ -1,66 +1,59 @@
 import pytest 
-from selene import browser, be, have, command
+from selene import browser, have, be
 from selenium.webdriver.chrome.options import Options 
 from pathlib import Path
 from selenium.webdriver import ActionChains
+from js_click import click_visible
+from registration_page import RegistrationPage
+from sources import Sources
 
 
 
-@pytest.fixture (autouse=True, scope="session")
+@pytest.fixture (autouse=True, scope="function")
 def browser_config():
     options = Options()
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--headless=new')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
     browser.config.driver_options = options
     browser.config.timeout = 25
     browser.open("https://demoqa.com/automation-practice-form")
     yield
     browser.quit()
 
-def click_visible(selector):
-    el = browser.element(selector)
-    el.should(be.present)
-    el.perform(command.js.scroll_into_view)
-    el.should(be.clickable).click()
-
-def actions_click(selector):
-    we = browser.driver.find_element("css selector", selector)
-    ActionChains(browser.driver).move_to_element(we).click().perform()
-
 
 def test_min_valid_form():
-    browser.element("#firstName").type("Andrew")
-    browser.element("#lastName").type("Second")
-    click_visible("label[for='gender-radio-1']")
-    browser.element("#userNumber").type("1231231231")
-    click_visible("#submit")
+    page = RegistrationPage()
+    page.fill_first_name("Andrew")
+    page.fill_last_name("Second")
+    page.fill_number("1231231231")
+    page.select_gender()
 
-    browser.element("#example-modal-sizes-title-lg").should(have.text("Thanks for submitting the form"))
+    page.submit_form()
+    page.modal_title.should(have.text("Thanks for submitting the form"))
 
 
 def test_all_valid_form():
-    browser.element("#firstName").type("Andrew")
-    browser.element("#lastName").type("Second")
-    click_visible("label[for='gender-radio-1']")
-    browser.element("#userEmail").type("test@gmail.com")
-    browser.element("#userNumber").type("1231231231")
+    page = RegistrationPage()
+    page.fill_first_name("Andrew")
+    page.fill_last_name("Second")
+    page.fill_number("1231231231")
+    page.select_gender()
+    page.fill_email("test@gmail.com")
     click_visible("#dateOfBirthInput")
-    browser.element(".react-datepicker__month-select option[value='0']").click()
-    browser.element(".react-datepicker__year-select option[value='2000']").click()
-    browser.element(".react-datepicker__day--001").click()
-    click_visible("#subjectsInput")
-    browser.element("#subjectsInput").type("Math")
-    click_visible("#react-select-2-option-0") 
-    file_path = str(Path("/Users/Geyger.Andrey/Desktop/repo_QA/tmp/file_example_JPG_100kB.jpg").resolve())
-    browser.element("#uploadPicture").set(file_path)   
-    browser.element("#currentAddress").type("Some address 1") 
-    click_visible("#state")
-    browser.element("#react-select-3-option-0").with_(timeout=7).should(be.visible).click()
-    click_visible("#city")
-    browser.element("#react-select-4-option-0").with_(timeout=7).should(be.visible).click()
-    click_visible("#submit")
-    browser.all('.modal.show').should(have.size(1))  # дождаться, что появилась одна модалка
+    page.select_date_of_birth()
+    page.select_subjects("Math")
+ 
+    page.upload_picture(Sources.PICTURE_PATH)   
+    page.fill_current_address("Some address 1") 
+    page.select_state("California")
+    page.select_city("Los Angeles")
+    page.submit_form()
+
     
-    browser.element("#example-modal-sizes-title-lg").with_(timeout=5).should(have.text("Thanks for submitting the form"))
+    page.modal_title.should(have.text("Thanks for submitting the form"))
 
 
